@@ -547,12 +547,15 @@
       }
 
       container.innerHTML = users.map((u, i) => `
-        <div class="note-item" style="border-left-color: var(--success); margin-bottom:10px;">
-          <div style="flex:1;">
-            <strong>👨‍🎓 ${u.name}</strong>
-            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
-              Roll No: <span style="color:var(--primary-color);">${u.rollNumber}</span>
-              &nbsp;•&nbsp; #${i + 1}
+        <div class="note-item" style="border-left-color: var(--success); margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <strong>👨‍🎓 ${u.name}</strong>
+              <span style="font-size:0.75rem; background:rgba(0,230,118,0.1); color:#00E676; padding:2px 8px; border-radius:20px; border:1px solid rgba(0,230,118,0.2);">#${i + 1}</span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px; display:flex; flex-direction:column; gap:3px;">
+              <div>🎫 Roll No: <span style="color:var(--primary-color); font-weight:600;">${u.rollNumber}</span></div>
+              <div>📧 Gmail: <a href="mailto:${u.email || 'N/A'}" style="color:#00bcd4; text-decoration:none; font-weight:500;">${u.email || '<span style="color:#ff6584;">Not provided</span>'}</a></div>
             </div>
           </div>
           <button class="btn btn-danger" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;" onclick="deleteStudent('${u.id}')">🗑️ Remove</button>
