@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyHub - Admin Panel</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .edit-modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+      display:flex; justify-content:center; align-items:center; z-index:3000;
+    }
+    .edit-modal-box {
+      width: 95%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles-canvas"></canvas>
+
+  <header>
+    <div class="logo">🛡️ StudyHub Admin</div>
+    <nav style="display: flex; gap: 12px; align-items: center;">
+      <span id="userNameDisplay" style="font-weight: 600; color: #a78bfa; font-size: 0.9rem;"></span>
+      <button class="btn btn-secondary" onclick="logout()" style="padding: 8px 16px; font-size: 0.9rem;">&#8592; Home</button>
+    </nav>
+  </header>
+
+  <!-- Live Stats Bar -->
+  <div style="background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(138,43,226,0.05)); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 14px 30px;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; gap: 30px; align-items: center; flex-wrap: wrap; justify-content: center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.5rem; font-weight:800; background: linear-gradient(135deg,#6c63ff,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;" id="adminStatStudents">0</span>
+        <span style="color:var(--text-muted); font-size:0.85rem;">👩‍🎓 Students</span>
+      </div>
+      <div style="color:rgba(255,255,255,0.1);">|</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.5rem; font-weight:800; background: linear-gradient(135deg,#00E676,#00bcd4); -webkit-background-clip:text; -webkit-text-fill-color:transparent;" id="adminStatSubjects">0</span>
+        <span style="color:var(--text-muted); font-size:0.85rem;">📚 Subjects</span>
+      </div>
+      <div style="color:rgba(255,255,255,0.1);">|</div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.5rem; font-weight:800; background: linear-gradient(135deg,#ff6584,#ffb347); -webkit-background-clip:text; -webkit-text-fill-color:transparent;" id="adminStatNotes">0</span>
+        <span style="color:var(--text-muted); font-size:0.85rem;">📄 Notes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="admin-panel">
+
+      <!-- Sidebar -->
+      <div class="glass-card sidebar">
+        <div style="text-align:center; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:2rem; margin-bottom:4px;">🛡️</div>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Admin Control Panel</div>
+        </div>
+        <button class="sidebar-btn active" onclick="switchView('uploadView', this)">📤 Upload Official Notes</button>
+        <button class="sidebar-btn" onclick="switchView('manageNotesView', this)">📋 Manage Notes</button>
+        <button class="sidebar-btn" onclick="switchView('subjectsView', this)">📚 Manage Subjects</button>
+        <button class="sidebar-btn" onclick="switchView('announcementView', this)">📢 Announcements</button>
+        <button class="sidebar-btn" onclick="switchView('remindersView', this)">⏱️ Manage Reminders</button>
+        <button class="sidebar-btn" onclick="switchView('studentsView', this)">👩‍🎓 Manage Students</button>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+
+        <!-- ===== UPLOAD VIEW ===== -->
+        <div id="uploadView" class="glass-card view-section">
+          <h2 style="margin-bottom:6px;">📤 Upload Official Note</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">Upload lecture notes, slides or materials for students.</p>
+          <form id="adminUploadForm">
+            <label>Select Subject</label>
+            <select id="adminSubject" class="input-field" required>
+              <!-- Populated by JS -->
+            </select>
+
+            <label>Note Title</label>
+            <input type="text" id="adminNoteTitle" class="input-field" required placeholder="e.g. Lecture 3 - Probability Basics">
+
+            <label>File (PDF/Image)</label>
+            <input type="file" id="adminNoteFile" class="input-field" required accept=".pdf,image/*">
+            
+            <button type="submit" class="btn" style="padding:14px 28px;">📤 Upload to Portal</button>
+          </form>
+        </div>
+
+        <!-- ===== MANAGE NOTES VIEW ===== -->
+        <div id="manageNotesView" class="glass-card view-section hidden">
+          <h2 style="margin-bottom:6px;">📋 Manage Official Notes</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Delete uploaded notes from the portal.</p>
+          <div id="adminNotesList"></div>
+        </div>
+
+        <!-- ===== SUBJECTS VIEW ===== -->
+        <div id="subjectsView" class="glass-card view-section hidden">
+          <h2 style="margin-bottom:6px;">📚 Manage Subjects</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">Add, edit or delete subjects. Changes apply everywhere for all students.</p>
+
+          <!-- Add Subject Form -->
+          <div style="background: rgba(108,99,255,0.06); border:1px solid rgba(108,99,255,0.15); border-radius:14px; padding:20px; margin-bottom:24px;">
+            <h3 style="margin-bottom:16px; font-size:1rem; color:#a78bfa;">➕ Add New Subject</h3>
+            <form id="addSubjectForm">
+              <label>Subject Name</label>
+              <input type="text" id="newSubjName" class="input-field" required placeholder="e.g. Database Systems">
+
+              <label>Description</label>
+              <input type="text" id="newSubjDesc" class="input-field" placeholder="e.g. SQL, normalization & design">
+
+              <label>Choose Icon</label>
+              <div class="icon-picker-grid" id="iconPickerAdd"></div>
+              <input type="hidden" id="newSubjIcon" value="📚">
+
+              <label>Choose Color</label>
+              <div class="color-picker-grid" id="colorPickerAdd"></div>
+              <input type="hidden" id="newSubjColor" value="#6c63ff">
+
+              <button type="submit" class="btn btn-success">➕ Add Subject</button>
+            </form>
+          </div>
+
+          <!-- Subjects List -->
+          <h3 style="margin-bottom:14px; font-size:1rem; color:var(--text-muted);">Current Subjects</h3>
+          <div id="adminSubjectsList"></div>
+        </div>
+
+        <!-- ===== ANNOUNCEMENTS VIEW ===== -->
+        <div id="announcementView" class="glass-card view-section hidden">
+          <h2 style="margin-bottom:6px;">📢 Post Announcement</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">Post a global announcement visible to all students.</p>
+          <form id="announcementForm">
+            <label>Announcement Text</label>
+            <textarea id="announcementText" class="input-field" rows="4" required placeholder="Type important update here..."></textarea>
+            <button type="submit" class="btn">📢 Post Globally</button>
+          </form>
+          
+          <h3 style="margin-top: 40px; margin-bottom: 20px;">Recent Announcements</h3>
+          <div id="adminAnnouncementsList"></div>
+        </div>
+
+        <!-- ===== REMINDERS VIEW ===== -->
+        <div id="remindersView" class="glass-card view-section hidden">
+          <h2 style="margin-bottom:6px;">⏱️ Manage Reminders</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">Set deadlines per subject — visible as countdown timers for students.</p>
+          <form id="reminderForm">
+            <label>Subject</label>
+            <select id="reminderSubject" class="input-field" required></select>
+
+            <label>Type</label>
+            <select id="reminderType" class="input-field" required>
+              <option value="Quiz">📝 Quiz</option>
+              <option value="Assignment">📋 Assignment</option>
+              <option value="Project">🚀 Project</option>
+            </select>
+
+            <label>Topic / Title</label>
+            <input type="text" id="reminderTopic" class="input-field" required placeholder="e.g. HTML & CSS Project">
+
+            <label>Deadline (Date & Time)</label>
+            <input type="datetime-local" id="reminderDeadline" class="input-field" required>
+
+            <button type="submit" class="btn">⏱️ Add Reminder</button>
+          </form>
+          
+          <h3 style="margin-top: 40px; margin-bottom: 20px;">Active Reminders</h3>
+          <div id="adminRemindersList"></div>
+        </div>
+
+        <!-- ===== STUDENTS VIEW ===== -->
+        <div id="studentsView" class="glass-card view-section hidden">
+          <h2 style="margin-bottom:6px;">👩‍🎓 Registered Students</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Manage student accounts. Count auto-updates as students register.</p>
+          <div id="adminStudentsList"></div>
+        </div>
+
+      </div><!-- /content-area -->
+    </div><!-- /admin-panel -->
+  </div>
+
+  <!-- ===== EDIT SUBJECT MODAL ===== -->
+  <div id="editSubjectModal" class="hidden edit-modal-overlay">
+    <div class="glass-card edit-modal-box">
+      <h3 style="margin-bottom:20px;">✏️ Edit Subject</h3>
+      <form id="editSubjectForm">
+        <input type="hidden" id="editSubjIndex">
+
+        <label>Subject Name</label>
+        <input type="text" id="editSubjName" class="input-field" required>
+
+        <label>Description</label>
+        <input type="text" id="editSubjDesc" class="input-field">
+
+        <label>Choose Icon</label>
+        <div class="icon-picker-grid" id="iconPickerEdit"></div>
+        <input type="hidden" id="editSubjIcon" value="📚">
+
+        <label>Choose Color</label>
+        <div class="color-picker-grid" id="colorPickerEdit"></div>
+        <input type="hidden" id="editSubjColor" value="#6c63ff">
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="submit" class="btn" style="flex:1;">✅ Save Changes</button>
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="closeEditModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // ===== PARTICLES =====
+    (function() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      resize();
+      window.addEventListener('resize', resize);
+      class P {
+        constructor() { this.reset(); }
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.speedX = (Math.random() - 0.5) * 0.3;
+          this.speedY = (Math.random() - 0.5) * 0.3;
+          this.opacity = Math.random() * 0.25 + 0.05;
+          this.hue = Math.random() > 0.5 ? 245 : 280;
+        }
+        update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset(); }
+        draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fillStyle = `hsla(${this.hue},80%,70%,${this.opacity})`; ctx.fill(); }
+      }
+      for (let i = 0; i < 35; i++) particles.push(new P());
+      function animate() { ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+      animate();
+    })();
+
+    // ===== INIT ADMIN =====
+    const user = requireAuth('admin');
+    document.getElementById('userNameDisplay').textContent = 'Admin: ' + user.name;
+
+    // Update live stats bar
+    function refreshStats() {
+      const stats = getLiveStats();
+      document.getElementById('adminStatStudents').textContent = stats.students;
+      document.getElementById('adminStatSubjects').textContent = stats.subjects;
+      document.getElementById('adminStatNotes').textContent = stats.notes;
+    }
+    refreshStats();
+
+    // ===== POPULATE SUBJECT DROPDOWNS =====
+    function populateSubjectDropdowns() {
+      const subjects = getSubjects();
+      const selects = ['adminSubject', 'reminderSubject'];
+      selects.forEach(id => {
+        const sel = document.getElementById(id);
+        const current = sel.value;
+        sel.innerHTML = '';
+        subjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.name;
+          opt.textContent = s.icon + ' ' + s.name;
+          sel.appendChild(opt);
+        });
+        // Restore previous value if still valid
+        if (current && subjects.find(s => s.name === current)) sel.value = current;
+      });
+    }
+    populateSubjectDropdowns();
+
+    // ===== ICON & COLOR PICKERS =====
+    function buildIconPicker(containerId, hiddenId, selectedIcon) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = SUBJECT_ICONS.map(icon => `
+        <div class="icon-picker-item ${icon === selectedIcon ? 'selected' : ''}" 
+             onclick="selectIcon('${containerId}','${hiddenId}','${icon}')" 
+             title="${icon}">${icon}</div>
+      `).join('');
+      document.getElementById(hiddenId).value = selectedIcon;
+    }
+
+    function selectIcon(containerId, hiddenId, icon) {
+      document.querySelectorAll(`#${containerId} .icon-picker-item`).forEach(el => el.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById(hiddenId).value = icon;
+    }
+
+    function buildColorPicker(containerId, hiddenId, selectedColor) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = SUBJECT_COLORS.map(color => `
+        <div class="color-picker-item ${color === selectedColor ? 'selected' : ''}" 
+             style="background:${color};" 
+             onclick="selectColor('${containerId}','${hiddenId}','${color}')" 
+             title="${color}"></div>
+      `).join('');
+      document.getElementById(hiddenId).value = selectedColor;
+    }
+
+    function selectColor(containerId, hiddenId, color) {
+      document.querySelectorAll(`#${containerId} .color-picker-item`).forEach(el => el.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById(hiddenId).value = color;
+    }
+
+    // Build pickers on page load
+    buildIconPicker('iconPickerAdd', 'newSubjIcon', '📚');
+    buildColorPicker('colorPickerAdd', 'newSubjColor', '#6c63ff');
+
+    // ===== SWITCH VIEW =====
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(viewId).classList.remove('hidden');
+      document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if(viewId === 'manageNotesView') renderAdminNotes();
+      if(viewId === 'studentsView') renderStudents();
+      if(viewId === 'announcementView') renderAnnouncementsList();
+      if(viewId === 'remindersView') renderRemindersList();
+      if(viewId === 'subjectsView') renderAdminSubjectsList();
+    }
+
+    // ===== UPLOAD OFFICIAL NOTE =====
+    document.getElementById('adminUploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const title = document.getElementById('adminNoteTitle').value.trim();
+      const subject = document.getElementById('adminSubject').value;
+      const fileInput = document.getElementById('adminNoteFile');
+      const file = fileInput.files[0];
+      
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const base64String = event.target.result;
+        
+        const newNote = {
+          id: Date.now().toString(),
+          title,
+          subject,
+          type: 'official',
+          uploadedBy: user.id,
+          uploaderName: user.name,
+          date: Date.now(),
+          fileData: base64String,
+          mimeType: file.type,
+          fileName: file.name
+        };
+
+        const notes = getData(STORAGE_KEYS.NOTES);
+        try {
+          notes.push(newNote);
+          saveData(STORAGE_KEYS.NOTES, notes);
+          showToast('✅ Official Note Published!');
+          this.reset();
+          populateSubjectDropdowns();
+          refreshStats();
+        } catch(err) {
+          showToast('❌ Storage Limit Exceeded! LocalStorage full.');
+        }
+      }.bind(this);
+      
+      reader.readAsDataURL(file);
+    });
+
+    // ===== MANAGE NOTES =====
+    function renderAdminNotes() {
+      const notes = getData(STORAGE_KEYS.NOTES).filter(n => n.type === 'official');
+      const container = document.getElementById('adminNotesList');
+      
+      if(notes.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No official notes uploaded yet.</p>';
+        return;
+      }
+
+      container.innerHTML = notes.map(n => `
+        <div class="note-item" style="margin-bottom:10px;">
+          <div style="flex:1; overflow:hidden;">
+            <strong>📄 ${n.title}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">📚 ${n.subject} • ${new Date(n.date).toLocaleDateString()}</div>
+          </div>
+          <button class="btn btn-danger" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;" onclick="deleteNote('${n.id}')">🗑️ Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteNote(id) {
+      if(!confirm('Are you sure you want to delete this Official Note?')) return;
+      let notes = getData(STORAGE_KEYS.NOTES);
+      notes = notes.filter(n => n.id !== id);
+      saveData(STORAGE_KEYS.NOTES, notes);
+      showToast('Note deleted 🗑️');
+      renderAdminNotes();
+      refreshStats();
+    }
+
+    // ===== MANAGE SUBJECTS =====
+    function renderAdminSubjectsList() {
+      const subjects = getSubjects();
+      const container = document.getElementById('adminSubjectsList');
+
+      if(subjects.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No subjects found. Add one above!</p>';
+        return;
+      }
+
+      container.innerHTML = subjects.map((s, idx) => `
+        <div class="subject-manage-card" style="border-left: 4px solid ${s.color};">
+          <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+            <div style="font-size:2rem; background:${s.bgColor}; padding:10px; border-radius:12px; flex-shrink:0;">${s.icon}</div>
+            <div style="min-width:0;">
+              <div style="font-weight:700; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.name}</div>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${s.description || 'No description'}</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; flex-shrink:0;">
+            <button class="btn" style="padding:8px 14px; font-size:0.85rem; background:linear-gradient(135deg,#00bcd4,#0080a0);" onclick="openEditSubject(${idx})">✏️ Edit</button>
+            <button class="btn btn-danger" style="padding:8px 14px; font-size:0.85rem;" onclick="deleteSubject(${idx})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Add Subject
+    document.getElementById('addSubjectForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newSubjName').value.trim();
+      const desc = document.getElementById('newSubjDesc').value.trim();
+      const icon = document.getElementById('newSubjIcon').value || '📚';
+      const color = document.getElementById('newSubjColor').value || '#6c63ff';
+
+      const subjects = getSubjects();
+      if(subjects.find(s => s.name.toLowerCase() === name.toLowerCase())) {
+        showToast('❌ A subject with this name already exists!');
+        return;
+      }
+
+      // Convert hex to rgba bg
+      const hex = color.replace('#','');
+      const r = parseInt(hex.substring(0,2),16);
+      const g = parseInt(hex.substring(2,4),16);
+      const b = parseInt(hex.substring(4,6),16);
+      const bgColor = `rgba(${r},${g},${b},0.15)`;
+
+      subjects.push({ name, icon, color, bgColor, description: desc });
+      saveSubjects(subjects);
+      showToast('✅ Subject added!');
+      this.reset();
+      buildIconPicker('iconPickerAdd', 'newSubjIcon', '📚');
+      buildColorPicker('colorPickerAdd', 'newSubjColor', '#6c63ff');
+      renderAdminSubjectsList();
+      populateSubjectDropdowns();
+      refreshStats();
+    });
+
+    // Open Edit Modal
+    function openEditSubject(idx) {
+      const subjects = getSubjects();
+      const s = subjects[idx];
+      document.getElementById('editSubjIndex').value = idx;
+      document.getElementById('editSubjName').value = s.name;
+      document.getElementById('editSubjDesc').value = s.description || '';
+      buildIconPicker('iconPickerEdit', 'editSubjIcon', s.icon);
+      buildColorPicker('colorPickerEdit', 'editSubjColor', s.color);
+      document.getElementById('editSubjectModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editSubjectModal').classList.add('hidden');
+    }
+
+    document.getElementById('editSubjectForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const idx = parseInt(document.getElementById('editSubjIndex').value);
+      const name = document.getElementById('editSubjName').value.trim();
+      const desc = document.getElementById('editSubjDesc').value.trim();
+      const icon = document.getElementById('editSubjIcon').value || '📚';
+      const color = document.getElementById('editSubjColor').value || '#6c63ff';
+
+      const subjects = getSubjects();
+      const oldName = subjects[idx].name;
+
+      // Convert hex to rgba
+      const hex = color.replace('#','');
+      const r = parseInt(hex.substring(0,2),16);
+      const g = parseInt(hex.substring(2,4),16);
+      const b = parseInt(hex.substring(4,6),16);
+      const bgColor = `rgba(${r},${g},${b},0.15)`;
+
+      subjects[idx] = { name, icon, color, bgColor, description: desc };
+      saveSubjects(subjects);
+
+      // Rename references in notes & reminders if name changed
+      if(oldName !== name) {
+        let notes = getData(STORAGE_KEYS.NOTES);
+        notes.forEach(n => { if(n.subject === oldName) n.subject = name; });
+        saveData(STORAGE_KEYS.NOTES, notes);
+
+        let reminders = getData(STORAGE_KEYS.REMINDERS);
+        reminders.forEach(r => { if(r.subject === oldName) r.subject = name; });
+        saveData(STORAGE_KEYS.REMINDERS, reminders);
+      }
+
+      showToast('✅ Subject updated!');
+      closeEditModal();
+      renderAdminSubjectsList();
+      populateSubjectDropdowns();
+      refreshStats();
+    });
+
+    function deleteSubject(idx) {
+      const subjects = getSubjects();
+      const s = subjects[idx];
+      if(!confirm(`Delete "${s.name}"? Notes for this subject will also be removed.`)) return;
+
+      // Remove associated notes
+      let notes = getData(STORAGE_KEYS.NOTES);
+      notes = notes.filter(n => n.subject !== s.name);
+      saveData(STORAGE_KEYS.NOTES, notes);
+
+      // Remove associated reminders
+      let reminders = getData(STORAGE_KEYS.REMINDERS);
+      reminders = reminders.filter(r => r.subject !== s.name);
+      saveData(STORAGE_KEYS.REMINDERS, reminders);
+
+      subjects.splice(idx, 1);
+      saveSubjects(subjects);
+      showToast('Subject deleted 🗑️');
+      renderAdminSubjectsList();
+      populateSubjectDropdowns();
+      refreshStats();
+    }
+
+    // ===== STUDENTS =====
+    function renderStudents() {
+      const users = getData(STORAGE_KEYS.USERS).filter(u => u.role === 'student');
+      const container = document.getElementById('adminStudentsList');
+      
+      if(users.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No students registered yet.</p>';
+        return;
+      }
+
+      container.innerHTML = users.map((u, i) => `
+        <div class="note-item" style="border-left-color: var(--success); margin-bottom:10px;">
+          <div style="flex:1;">
+            <strong>👨‍🎓 ${u.name}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+              Roll No: <span style="color:var(--primary-color);">${u.rollNumber}</span>
+              &nbsp;•&nbsp; #${i + 1}
+            </div>
+          </div>
+          <button class="btn btn-danger" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;" onclick="deleteStudent('${u.id}')">🗑️ Remove</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteStudent(id) {
+      if(!confirm('Delete this student account and their personal notes?')) return;
+      let users = getData(STORAGE_KEYS.USERS);
+      users = users.filter(u => u.id !== id);
+      saveData(STORAGE_KEYS.USERS, users);
+      
+      let notes = getData(STORAGE_KEYS.NOTES);
+      notes = notes.filter(n => n.uploadedBy !== id);
+      saveData(STORAGE_KEYS.NOTES, notes);
+
+      showToast('Student Removed 🗑️');
+      renderStudents();
+      refreshStats();
+    }
+
+    // ===== ANNOUNCEMENTS =====
+    document.getElementById('announcementForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const text = document.getElementById('announcementText').value.trim();
+      if(!text) return;
+
+      const anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+      anns.push({ id: Date.now().toString(), text, date: Date.now() });
+      saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
+      showToast('📢 Announcement Posted!');
+      this.reset();
+      renderAnnouncementsList();
+    });
+
+    function renderAnnouncementsList() {
+      const anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+      const container = document.getElementById('adminAnnouncementsList');
+      if(anns.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No announcements yet.</p>';
+        return;
+      }
+
+      container.innerHTML = [...anns].reverse().map(a => `
+        <div class="note-item" style="border-left-color: #00E676; margin-bottom:10px;">
+          <div style="flex:1;">
+            <p style="margin-bottom:5px; line-height:1.5;">${a.text}</p>
+            <div style="font-size:0.75rem; color:var(--text-muted);">${new Date(a.date).toLocaleString()}</div>
+          </div>
+          <button class="btn btn-danger" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;" onclick="deleteAnnouncement('${a.id}')">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteAnnouncement(id) {
+      if(!confirm('Delete this announcement?')) return;
+      let anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+      anns = anns.filter(a => a.id !== id);
+      saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
+      showToast('Announcement deleted 🗑️');
+      renderAnnouncementsList();
+    }
+
+    // ===== REMINDERS =====
+    document.getElementById('reminderForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const subject = document.getElementById('reminderSubject').value;
+      const type = document.getElementById('reminderType').value;
+      const topic = document.getElementById('reminderTopic').value.trim();
+      const deadline = document.getElementById('reminderDeadline').value;
+      if(!subject || !topic || !deadline) return;
+
+      const reminders = getData(STORAGE_KEYS.REMINDERS);
+      reminders.push({
+        id: Date.now().toString(),
+        subject, type, topic,
+        deadline: new Date(deadline).getTime(),
+        dateCreated: Date.now()
+      });
+      saveData(STORAGE_KEYS.REMINDERS, reminders);
+      showToast('⏱️ Reminder Added!');
+      this.reset();
+      populateSubjectDropdowns();
+      renderRemindersList();
+    });
+
+    function renderRemindersList() {
+      const reminders = getData(STORAGE_KEYS.REMINDERS);
+      const container = document.getElementById('adminRemindersList');
+      if(reminders.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">No reminders yet.</p>';
+        return;
+      }
+
+      const typeEmoji = { Quiz: '📝', Assignment: '📋', Project: '🚀' };
+
+      container.innerHTML = reminders.map(r => `
+        <div class="note-item" style="border-left-color: var(--primary-color); margin-bottom:10px;">
+          <div style="flex:1; min-width:0; overflow:hidden;">
+            <strong>${typeEmoji[r.type] || '🔔'} [${r.type}] ${r.topic}</strong>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+              📚 <span style="color:var(--primary-color);">${r.subject}</span>
+              &nbsp;•&nbsp; ⏰ ${new Date(r.deadline).toLocaleString()}
+            </div>
+          </div>
+          <button class="btn btn-danger" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;" onclick="deleteReminder('${r.id}')">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteReminder(id) {
+      if(!confirm('Delete this reminder?')) return;
+      let reminders = getData(STORAGE_KEYS.REMINDERS);
+      reminders = reminders.filter(r => r.id !== id);
+      saveData(STORAGE_KEYS.REMINDERS, reminders);
+      showToast('Reminder deleted 🗑️');
+      renderRemindersList();
+    }
+
+    // Click outside to close edit modal
+    document.getElementById('editSubjectModal').addEventListener('click', function(e) {
+      if(e.target === this) closeEditModal();
+    });
+  </script>
+</body>
+</html>
