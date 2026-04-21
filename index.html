@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyHub - SMIU BS IT Portal</title>
-  <meta name="description" content="StudyHub - The ultimate study portal for BS IT students at Sindh Madressatul Islam University, Karachi. Access notes, deadlines, and course materials.">
+  <meta name="description"
+    content="StudyHub - The ultimate study portal for BS IT students at Sindh Madressatul Islam University, Karachi. Access notes, deadlines, and course materials.">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
   <!-- Particle Canvas -->
@@ -23,78 +26,88 @@
 
   <!-- ===== HERO / AUTH SECTION ===== -->
   <div class="auth-container" style="flex-direction: column; gap: 35px; text-align: center; padding: 40px 20px;">
-    
+
     <!-- Welcome Section with Logo -->
     <div class="welcome-section" style="animation: fadeInDown 1s ease-out;">
       <!-- SMIU Logo SVG - Inline, no external file needed -->
       <div style="display:inline-block; margin-bottom:18px; animation: glow 3s ease-in-out infinite;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="90" height="90" style="border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.5);">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="90" height="90"
+          style="border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,0.5);">
           <!-- White background -->
-          <rect width="160" height="160" fill="white" rx="10"/>
+          <rect width="160" height="160" fill="white" rx="10" />
           <!-- Dark border -->
-          <rect width="160" height="160" fill="none" stroke="#1a1a1a" stroke-width="5" rx="10"/>
+          <rect width="160" height="160" fill="none" stroke="#1a1a1a" stroke-width="5" rx="10" />
 
           <!-- Green bottom bar -->
-          <rect x="5" y="118" width="150" height="8" fill="#2d6a2d" rx="2"/>
+          <rect x="5" y="118" width="150" height="8" fill="#2d6a2d" rx="2" />
           <!-- Red strip above green -->
-          <rect x="5" y="112" width="150" height="6" fill="#8b1a1a" rx="1"/>
+          <rect x="5" y="112" width="150" height="6" fill="#8b1a1a" rx="1" />
 
           <!-- BUILDING illustration -->
           <!-- Main building body -->
-          <rect x="52" y="72" width="56" height="42" fill="#8b1a1a" opacity="0.85"/>
+          <rect x="52" y="72" width="56" height="42" fill="#8b1a1a" opacity="0.85" />
           <!-- Building windows row -->
-          <rect x="58" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="70" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="82" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="94" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
+          <rect x="58" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="70" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="82" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="94" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
           <!-- Door -->
-          <rect x="71" y="98" width="18" height="16" fill="white" opacity="0.6" rx="2"/>
+          <rect x="71" y="98" width="18" height="16" fill="white" opacity="0.6" rx="2" />
           <!-- Center tower -->
-          <rect x="68" y="54" width="24" height="26" fill="#7a1515"/>
+          <rect x="68" y="54" width="24" height="26" fill="#7a1515" />
           <!-- Tower arch window -->
-          <ellipse cx="80" cy="65" rx="7" ry="9" fill="white" opacity="0.6"/>
+          <ellipse cx="80" cy="65" rx="7" ry="9" fill="white" opacity="0.6" />
           <!-- Tower top / spire base -->
-          <rect x="72" y="40" width="16" height="15" fill="#6a1010"/>
+          <rect x="72" y="40" width="16" height="15" fill="#6a1010" />
           <!-- Spire -->
-          <polygon points="80,18 71,42 89,42" fill="#5a0e0e"/>
+          <polygon points="80,18 71,42 89,42" fill="#5a0e0e" />
           <!-- Spire tip cross -->
-          <rect x="78.5" y="14" width="3" height="10" fill="#3d0a0a"/>
-          <rect x="75" y="18" width="10" height="2.5" fill="#3d0a0a"/>
+          <rect x="78.5" y="14" width="3" height="10" fill="#3d0a0a" />
+          <rect x="75" y="18" width="10" height="2.5" fill="#3d0a0a" />
 
           <!-- Wing sections -->
-          <rect x="18" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7"/>
-          <rect x="107" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7"/>
+          <rect x="18" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7" />
+          <rect x="107" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7" />
           <!-- Wing windows left -->
-          <rect x="24" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1"/>
-          <rect x="36" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1"/>
+          <rect x="24" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1" />
+          <rect x="36" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1" />
           <!-- Wing windows right -->
-          <rect x="115" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1"/>
-          <rect x="127" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1"/>
+          <rect x="115" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1" />
+          <rect x="127" y="92" width="7" height="9" fill="white" opacity="0.5" rx="1" />
 
           <!-- 1885 text -->
-          <text x="80" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#8b1a1a">1885</text>
+          <text x="80" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold"
+            fill="#8b1a1a">1885</text>
 
           <!-- SMI text -->
-          <text x="80" y="138" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="900" fill="#8b1a1a" letter-spacing="2">SMI</text>
+          <text x="80" y="138" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="900"
+            fill="#8b1a1a" letter-spacing="2">SMI</text>
           <!-- UNIVERSITY text -->
-          <text x="80" y="153" text-anchor="middle" font-family="Georgia,serif" font-size="8.5" font-weight="700" fill="#2d6a2d" letter-spacing="1.5">UNIVERSITY</text>
+          <text x="80" y="153" text-anchor="middle" font-family="Georgia,serif" font-size="8.5" font-weight="700"
+            fill="#2d6a2d" letter-spacing="1.5">UNIVERSITY</text>
         </svg>
       </div>
-      <h2 style="font-size: 1.15rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; font-weight: 600;">Sindh Madressatul Islam University Karachi</h2>
-      <h1 style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #6c63ff, #ff6584, #00E676, #00bcd4); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; letter-spacing: 1px; animation: shimmer 4s ease infinite;">Welcome to BS IT</h1>
-      <p style="font-size: 1.1rem; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px;">Your Ultimate Web Portal & Study Hub 🚀</p>
+      <h2
+        style="font-size: 1.15rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 12px; font-weight: 600;">
+        Sindh Madressatul Islam University Karachi</h2>
+      <h1
+        style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #6c63ff, #ff6584, #00E676, #00bcd4); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; letter-spacing: 1px; animation: shimmer 4s ease infinite;">
+        Welcome to BS IT</h1>
+      <p style="font-size: 1.1rem; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px;">Your Ultimate Web
+        Portal & Study Hub 🚀</p>
     </div>
-    
+
     <!-- Login Box -->
-    <div class="glass-card auth-box" id="loginBox" style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
+    <div class="glass-card auth-box" id="loginBox"
+      style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
       <h2 style="margin-bottom: 24px; text-align: center; font-size: 1.3rem;">Welcome Back 👋</h2>
       <form id="loginForm">
         <label>Roll Number</label>
         <input type="text" id="loginRoll" class="input-field" required placeholder="Enter your roll number">
-        
+
         <label>Password</label>
         <input type="password" id="loginPass" class="input-field" required placeholder="Enter password">
-        
+
         <button type="submit" class="btn" style="width: 100%; padding: 14px;">Login →</button>
       </form>
       <div class="auth-toggle">
@@ -103,21 +116,24 @@
     </div>
 
     <!-- Signup Box -->
-    <div class="glass-card auth-box hidden" id="signupBox" style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
+    <div class="glass-card auth-box hidden" id="signupBox"
+      style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
       <h2 style="margin-bottom: 24px; text-align: center; font-size: 1.3rem;">Create Account ✨</h2>
       <form id="signupForm">
         <label>📧 Gmail Address</label>
         <div style="position:relative;">
-          <input type="email" id="signupEmail" class="input-field" required placeholder="yourname@gmail.com" style="padding-left:42px;">
-          <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; pointer-events:none;">✉️</span>
+          <input type="email" id="signupEmail" class="input-field" required placeholder="yourname@gmail.com"
+            style="padding-left:42px;">
+          <span
+            style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; pointer-events:none;">✉️</span>
         </div>
 
         <label>Roll Number</label>
         <input type="text" id="signupRoll" class="input-field" required placeholder="e.g. BIT25S001">
-        
+
         <label>Password</label>
         <input type="password" id="signupPass" class="input-field" required placeholder="Create password">
-        
+
         <button type="submit" class="btn" style="width: 100%; padding: 14px;">Sign Up →</button>
       </form>
       <div class="auth-toggle">
@@ -131,24 +147,32 @@
   <div id="statsSection" style="width: 100%; max-width: 1100px; margin: 60px auto 0 auto; padding: 0 20px;">
     <h2 class="section-header">📊 Portal at a Glance</h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-      
+
       <div class="glass-card stat-card" style="border-top: 3px solid #6c63ff;">
-        <div class="stat-number" style="background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="statStudents">0</div>
+        <div class="stat-number"
+          style="background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          id="statStudents">0</div>
         <div class="stat-label">👩‍🎓 Registered Students</div>
       </div>
 
       <div class="glass-card stat-card" style="border-top: 3px solid #00E676;">
-        <div class="stat-number" style="background: linear-gradient(135deg, #00E676, #00bcd4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="statSubjects">0</div>
+        <div class="stat-number"
+          style="background: linear-gradient(135deg, #00E676, #00bcd4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          id="statSubjects">0</div>
         <div class="stat-label">📚 Core Subjects</div>
       </div>
 
       <div class="glass-card stat-card" style="border-top: 3px solid #ff6584;">
-        <div class="stat-number" style="background: linear-gradient(135deg, #ff6584, #ffb347); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="statNotes">0</div>
+        <div class="stat-number"
+          style="background: linear-gradient(135deg, #ff6584, #ffb347); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          id="statNotes">0</div>
         <div class="stat-label">📄 Notes Uploaded</div>
       </div>
 
       <div class="glass-card stat-card" style="border-top: 3px solid #ffd700;">
-        <div class="stat-number" style="background: linear-gradient(135deg, #ffd700, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">24/7</div>
+        <div class="stat-number"
+          style="background: linear-gradient(135deg, #ffd700, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          24/7</div>
         <div class="stat-label">⏰ Always Available</div>
       </div>
 
@@ -157,7 +181,7 @@
 
   <!-- ===== CORE SUBJECTS SECTION (Dynamic) ===== -->
   <div style="width: 100%; max-width: 1100px; margin: 60px auto 0 auto; padding: 0 20px;">
-    <h2 class="section-header">🎓 Core Subjects — BS IT Semester 3</h2>
+    <h2 class="section-header">🎓 Core Subjects — BS IT Semester 4</h2>
     <div id="frontSubjectsGrid" class="grid-3">
       <!-- Dynamically rendered -->
     </div>
@@ -197,10 +221,15 @@
 
   <!-- ===== TESTIMONIAL / HIGHLIGHT ===== -->
   <div style="width: 100%; max-width: 800px; margin: 60px auto 0 auto; padding: 0 20px;">
-    <div class="glass-card" style="text-align: center; padding: 40px 30px; border: 1px solid rgba(108,99,255,0.2); animation: glow 4s ease-in-out infinite;">
+    <div class="glass-card"
+      style="text-align: center; padding: 40px 30px; border: 1px solid rgba(108,99,255,0.2); animation: glow 4s ease-in-out infinite;">
       <div style="font-size: 3rem; margin-bottom: 16px;">🎯</div>
-      <h3 style="font-size: 1.3rem; margin-bottom: 12px; background: linear-gradient(135deg, #6c63ff, #ff6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">One Platform, All Your Study Needs</h3>
-      <p style="color: var(--text-muted); line-height: 1.8; max-width: 500px; margin: 0 auto;">Stop searching through endless WhatsApp messages. StudyHub brings all your lectures, notes, deadlines, and resources together — beautifully organized and always accessible.</p>
+      <h3
+        style="font-size: 1.3rem; margin-bottom: 12px; background: linear-gradient(135deg, #6c63ff, #ff6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        One Platform, All Your Study Needs</h3>
+      <p style="color: var(--text-muted); line-height: 1.8; max-width: 500px; margin: 0 auto;">Stop searching through
+        endless WhatsApp messages. StudyHub brings all your lectures, notes, deadlines, and resources together —
+        beautifully organized and always accessible.</p>
     </div>
   </div>
 
@@ -208,32 +237,39 @@
   <footer class="site-footer">
     <div style="max-width: 1100px; margin: 0 auto;">
       <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="36" height="36" style="border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.4); flex-shrink:0;">
-          <rect width="160" height="160" fill="white" rx="8"/>
-          <rect width="160" height="160" fill="none" stroke="#1a1a1a" stroke-width="5" rx="8"/>
-          <rect x="5" y="118" width="150" height="8" fill="#2d6a2d" rx="2"/>
-          <rect x="5" y="112" width="150" height="6" fill="#8b1a1a" rx="1"/>
-          <rect x="52" y="72" width="56" height="42" fill="#8b1a1a" opacity="0.85"/>
-          <rect x="58" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="70" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="82" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="94" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1"/>
-          <rect x="71" y="98" width="18" height="16" fill="white" opacity="0.6" rx="2"/>
-          <rect x="68" y="54" width="24" height="26" fill="#7a1515"/>
-          <ellipse cx="80" cy="65" rx="7" ry="9" fill="white" opacity="0.6"/>
-          <rect x="72" y="40" width="16" height="15" fill="#6a1010"/>
-          <polygon points="80,18 71,42 89,42" fill="#5a0e0e"/>
-          <rect x="78.5" y="14" width="3" height="10" fill="#3d0a0a"/>
-          <rect x="75" y="18" width="10" height="2.5" fill="#3d0a0a"/>
-          <rect x="18" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7"/>
-          <rect x="107" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7"/>
-          <text x="80" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold" fill="#8b1a1a">1885</text>
-          <text x="80" y="138" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="900" fill="#8b1a1a" letter-spacing="2">SMI</text>
-          <text x="80" y="153" text-anchor="middle" font-family="Georgia,serif" font-size="8.5" font-weight="700" fill="#2d6a2d" letter-spacing="1.5">UNIVERSITY</text>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="36" height="36"
+          style="border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.4); flex-shrink:0;">
+          <rect width="160" height="160" fill="white" rx="8" />
+          <rect width="160" height="160" fill="none" stroke="#1a1a1a" stroke-width="5" rx="8" />
+          <rect x="5" y="118" width="150" height="8" fill="#2d6a2d" rx="2" />
+          <rect x="5" y="112" width="150" height="6" fill="#8b1a1a" rx="1" />
+          <rect x="52" y="72" width="56" height="42" fill="#8b1a1a" opacity="0.85" />
+          <rect x="58" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="70" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="82" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="94" y="80" width="8" height="10" fill="white" opacity="0.7" rx="1" />
+          <rect x="71" y="98" width="18" height="16" fill="white" opacity="0.6" rx="2" />
+          <rect x="68" y="54" width="24" height="26" fill="#7a1515" />
+          <ellipse cx="80" cy="65" rx="7" ry="9" fill="white" opacity="0.6" />
+          <rect x="72" y="40" width="16" height="15" fill="#6a1010" />
+          <polygon points="80,18 71,42 89,42" fill="#5a0e0e" />
+          <rect x="78.5" y="14" width="3" height="10" fill="#3d0a0a" />
+          <rect x="75" y="18" width="10" height="2.5" fill="#3d0a0a" />
+          <rect x="18" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7" />
+          <rect x="107" y="85" width="35" height="29" fill="#8b1a1a" opacity="0.7" />
+          <text x="80" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="bold"
+            fill="#8b1a1a">1885</text>
+          <text x="80" y="138" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="900"
+            fill="#8b1a1a" letter-spacing="2">SMI</text>
+          <text x="80" y="153" text-anchor="middle" font-family="Georgia,serif" font-size="8.5" font-weight="700"
+            fill="#2d6a2d" letter-spacing="1.5">UNIVERSITY</text>
         </svg>
-        <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; background: linear-gradient(135deg, #6c63ff, #ff6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">StudyHub</div>
+        <div
+          style="font-size: 1.4rem; font-weight: 800; letter-spacing: 2px; background: linear-gradient(135deg, #6c63ff, #ff6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          StudyHub</div>
       </div>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Sindh Madressatul Islam University Karachi • BS Information Technology • Semester 3</p>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">Sindh Madressatul Islam University
+        Karachi • BS Information Technology • Semester 4</p>
       <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
         <span style="color: var(--text-muted); font-size: 0.8rem;" id="footerSubjectCount">📚 6 Subjects</span>
         <span style="color: var(--text-muted); font-size: 0.8rem;">•</span>
@@ -243,14 +279,15 @@
         <span style="color: var(--text-muted); font-size: 0.8rem;">•</span>
         <span style="color: var(--text-muted); font-size: 0.8rem;">📱 Mobile Friendly</span>
       </div>
-      <p style="color: rgba(255,255,255,0.25); font-size: 0.78rem;">Developed with ❤️ by <strong style="color: #00E676;">Nisar Zain</strong> &nbsp;|&nbsp; © 2026 StudyHub. All rights reserved.</p>
+      <p style="color: rgba(255,255,255,0.25); font-size: 0.78rem;">Developed with ❤️ by <strong
+          style="color: #00E676;">Nisar Zain</strong> &nbsp;|&nbsp; © 2026 StudyHub. All rights reserved.</p>
     </div>
   </footer>
 
   <script src="app.js"></script>
   <script>
     // ===== PARTICLES ANIMATION =====
-    (function() {
+    (function () {
       const canvas = document.getElementById('particles-canvas');
       const ctx = canvas.getContext('2d');
       let particles = [];
@@ -375,7 +412,7 @@
       const roll = document.getElementById('loginRoll').value.trim();
       const pass = document.getElementById('loginPass').value;
       const users = getData(STORAGE_KEYS.USERS);
-      
+
       const found = users.find(u => u.rollNumber === roll && u.password === pass);
       if (found) {
         showToast('Login successful! 🎉');
@@ -391,8 +428,8 @@
     document.getElementById('signupForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-      const roll  = document.getElementById('signupRoll').value.trim();
-      const pass  = document.getElementById('signupPass').value;
+      const roll = document.getElementById('signupRoll').value.trim();
+      const pass = document.getElementById('signupPass').value;
 
       // ===== Gmail / Email Validation =====
       const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
@@ -452,8 +489,10 @@
   <!-- Floating WhatsApp Icon -->
   <a href="https://wa.me/923278743910" target="_blank" class="whatsapp-float">
     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
-      <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c-.003 1.396.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.004-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+      <path
+        d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c-.003 1.396.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.004-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
     </svg>
   </a>
 </body>
+
 </html>
