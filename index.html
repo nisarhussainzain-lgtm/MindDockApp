@@ -471,19 +471,34 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const roll = document.getElementById('loginRoll').value.trim();
+      const roll = document.getElementById('loginRoll').value.trim().toUpperCase(); // Normalize for students, though admin is 0250
       const pass = document.getElementById('loginPass').value;
-      const users = await getData(STORAGE_KEYS.USERS);
+      
+      try {
+        const users = await getData(STORAGE_KEYS.USERS);
+        
+        if (!users || !Array.isArray(users)) {
+          showToast('Could not connect to database. Please check your internet. 📡');
+          return;
+        }
 
-      const found = users.find(u => u.rollNumber === roll && u.password === pass);
-      if (found) {
-        showToast('Login successful! 🎉');
-        setCurrentUser(found);
-        setTimeout(() => {
-          window.location.href = found.role === 'admin' ? 'admin.html' : 'dashboard.html';
-        }, 1000);
-      } else {
-        showToast('Invalid Roll Number or Password ❌');
+        const found = users.find(u => 
+          (u.rollNumber && u.rollNumber.trim().toUpperCase() === roll) && 
+          u.password === pass
+        );
+
+        if (found) {
+          showToast('Login successful! 🎉');
+          setCurrentUser(found);
+          setTimeout(() => {
+            window.location.href = found.role === 'admin' ? 'admin.html' : 'dashboard.html';
+          }, 1000);
+        } else {
+          showToast('Invalid Roll Number or Password ❌');
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        showToast('An unexpected error occurred. Please try again. ⚠️');
       }
     });
 

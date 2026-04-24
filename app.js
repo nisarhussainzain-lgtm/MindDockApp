@@ -69,41 +69,56 @@ async function setDBData(key, value) {
 async function initDB() {
   if (!db) return;
 
-  let users = await getDBData(STORAGE_KEYS.USERS);
-  if (!users) {
-    // Add default admin account
-    const newUsers = [{
-      id: 'admin',
-      name: 'Site Admin',
-      rollNumber: '0250',
-      password: 'APSTNDP@0250',
-      role: 'admin'
-    }];
-    await setDBData(STORAGE_KEYS.USERS, newUsers);
-  } else {
-    // Force update admin credentials if they already exist
-    let admin = users.find(u => u.role === 'admin');
-    if (admin) {
-        admin.rollNumber = '0250';
-        admin.password = 'APSTNDP@0250';
-        await setDBData(STORAGE_KEYS.USERS, users);
+  try {
+    let users = await getDBData(STORAGE_KEYS.USERS);
+    
+    // Ensure users is an array
+    if (!users || !Array.isArray(users)) {
+      users = [];
     }
-  }
-  
-  if (!await getDBData(STORAGE_KEYS.NOTES)) {
-    await setDBData(STORAGE_KEYS.NOTES, []);
-  }
-  
-  if (!await getDBData(STORAGE_KEYS.ANNOUNCEMENTS)) {
-    await setDBData(STORAGE_KEYS.ANNOUNCEMENTS, []);
-  }
-  
-  if (!await getDBData(STORAGE_KEYS.REMINDERS)) {
-    await setDBData(STORAGE_KEYS.REMINDERS, []);
-  }
 
-  if (!await getDBData(STORAGE_KEYS.SUBJECTS)) {
-    await setDBData(STORAGE_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+    // Find or create admin
+    let admin = users.find(u => u.role === 'admin' || u.id === 'admin');
+    
+    if (admin) {
+      // Update existing admin
+      admin.rollNumber = '0250';
+      admin.password = 'APSTNDP@0250';
+      admin.role = 'admin'; // Ensure role is correctly set
+      admin.id = 'admin';   // Ensure ID is correctly set
+    } else {
+      // Create new admin if not found
+      users.push({
+        id: 'admin',
+        name: 'Site Admin',
+        rollNumber: '0250',
+        password: 'APSTNDP@0250',
+        role: 'admin'
+      });
+    }
+
+    // Save users back to DB to ensure admin is persisted
+    await setDBData(STORAGE_KEYS.USERS, users);
+    
+    // Initialize other collections if empty
+    if (!await getDBData(STORAGE_KEYS.NOTES)) {
+      await setDBData(STORAGE_KEYS.NOTES, []);
+    }
+    
+    if (!await getDBData(STORAGE_KEYS.ANNOUNCEMENTS)) {
+      await setDBData(STORAGE_KEYS.ANNOUNCEMENTS, []);
+    }
+    
+    if (!await getDBData(STORAGE_KEYS.REMINDERS)) {
+      await setDBData(STORAGE_KEYS.REMINDERS, []);
+    }
+
+    if (!await getDBData(STORAGE_KEYS.SUBJECTS)) {
+      await setDBData(STORAGE_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+    }
+    console.log("Database initialized successfully ✅");
+  } catch (error) {
+    console.error("Database initialization failed ❌:", error);
   }
 }
 
