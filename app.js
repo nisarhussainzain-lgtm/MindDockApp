@@ -25,8 +25,72 @@ const SUBJECT_ICONS = ['📊', '🔐', '🛠️', '🌐', '🌳', '🤖', '💻'
 // Color palette for subjects
 const SUBJECT_COLORS = ['#6c63ff', '#ff6584', '#00E676', '#00bcd4', '#ffd700', '#ff8c00', '#e040fb', '#ff5252', '#448aff', '#69f0ae', '#ffc107', '#7c4dff', '#18ffff', '#ff6e40', '#b388ff'];
 
-function initDB() {
-  let users = localStorage.getItem(STORAGE_KEYS.USERS);
+// ===== INDEXED DB WRAPPER =====
+const DB_NAME = 'StudyHubDB';
+const DB_VERSION = 1;
+let db = null;
+
+async function openDB() {
+  if (db) return db;
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('store')) {
+        db.createObjectStore('store');
+      }
+    };
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve(db);
+    };
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+async function getDBData(key) {
+  const database = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(['store'], 'readonly');
+    const store = transaction.objectStore('store');
+    const request = store.get(key);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+async function setDBData(key, value) {
+  const database = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(['store'], 'readwrite');
+    const store = transaction.objectStore('store');
+    const request = store.put(value, key);
+    request.onsuccess = () => resolve();
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+// ===== CORE LOGIC =====
+
+async function initDB() {
+  // Migrate from localStorage to IndexedDB if needed
+  for (const key of Object.values(STORAGE_KEYS)) {
+    const localData = localStorage.getItem(key);
+    if (localData) {
+      try {
+        const parsed = JSON.parse(localData);
+        await setDBData(key, parsed);
+        // Don't remove CURRENT_USER from localStorage as it's small and used for immediate redirect
+        if (key !== STORAGE_KEYS.CURRENT_USER) {
+          localStorage.removeItem(key);
+        }
+      } catch (e) {
+        console.error('Migration failed for key:', key, e);
+      }
+    }
+  }
+
+  let users = await getDBData(STORAGE_KEYS.USERS);
   if (!users) {
     // Add default admin account
     const newUsers = [{
@@ -36,64 +100,65 @@ function initDB() {
       password: 'APSTNDP@0250',
       role: 'admin'
     }];
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(newUsers));
+    await setDBData(STORAGE_KEYS.USERS, newUsers);
   } else {
     // Force update admin credentials if they already exist
-    let parsedUsers = JSON.parse(users);
-    let admin = parsedUsers.find(u => u.role === 'admin');
+    let admin = users.find(u => u.role === 'admin');
     if (admin) {
         admin.rollNumber = '0250';
         admin.password = 'APSTNDP@0250';
-        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(parsedUsers));
+        await setDBData(STORAGE_KEYS.USERS, users);
     }
   }
   
-  if (!localStorage.getItem(STORAGE_KEYS.NOTES)) {
-    localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify([]));
+  if (!await getDBData(STORAGE_KEYS.NOTES)) {
+    await setDBData(STORAGE_KEYS.NOTES, []);
   }
   
-  if (!localStorage.getItem(STORAGE_KEYS.ANNOUNCEMENTS)) {
-    localStorage.setItem(STORAGE_KEYS.ANNOUNCEMENTS, JSON.stringify([]));
+  if (!await getDBData(STORAGE_KEYS.ANNOUNCEMENTS)) {
+    await setDBData(STORAGE_KEYS.ANNOUNCEMENTS, []);
   }
   
-  if (!localStorage.getItem(STORAGE_KEYS.REMINDERS)) {
-    localStorage.setItem(STORAGE_KEYS.REMINDERS, JSON.stringify([]));
+  if (!await getDBData(STORAGE_KEYS.REMINDERS)) {
+    await setDBData(STORAGE_KEYS.REMINDERS, []);
   }
 
-  // Initialize subjects if not present
-  if (!localStorage.getItem(STORAGE_KEYS.SUBJECTS)) {
-    localStorage.setItem(STORAGE_KEYS.SUBJECTS, JSON.stringify(DEFAULT_SUBJECTS));
+  if (!await getDBData(STORAGE_KEYS.SUBJECTS)) {
+    await setDBData(STORAGE_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
   }
 }
 
-function getSubjects() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.SUBJECTS)) || DEFAULT_SUBJECTS;
+async function getSubjects() {
+  const subjects = await getDBData(STORAGE_KEYS.SUBJECTS);
+  return subjects || DEFAULT_SUBJECTS;
 }
 
-function saveSubjects(subjects) {
-  localStorage.setItem(STORAGE_KEYS.SUBJECTS, JSON.stringify(subjects));
+async function saveSubjects(subjects) {
+  await setDBData(STORAGE_KEYS.SUBJECTS, subjects);
 }
 
-// Helper: get subject names array (for backward compatibility)
-function getSubjectNames() {
-  return getSubjects().map(s => s.name);
+// Helper: get subject names array
+async function getSubjectNames() {
+  const subjects = await getSubjects();
+  return subjects.map(s => s.name);
 }
 
 // Helper: find subject object by name
-function getSubjectByName(name) {
-  const subjects = getSubjects();
+async function getSubjectByName(name) {
+  const subjects = await getSubjects();
   return subjects.find(s => s.name === name) || { name, icon: '📚', color: '#6c63ff', bgColor: 'rgba(108,99,255,0.15)', description: '' };
 }
 
-function getData(key) {
-  return JSON.parse(localStorage.getItem(key)) || [];
+async function getData(key) {
+  return await getDBData(key) || [];
 }
 
-function saveData(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+async function saveData(key, data) {
+  await setDBData(key, data);
 }
 
 function getCurrentUser() {
+  // Keep current user in localStorage for synchronous access on page load
   return JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER));
 }
 
@@ -134,7 +199,6 @@ function requireAuth(role = null) {
   }
   
   if (role && user.role !== role) {
-    // Attempted to access restricted page, send to own dashboard
     window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
     return null;
   }
@@ -142,11 +206,10 @@ function requireAuth(role = null) {
   return user;
 }
 
-// Get live stats
-function getLiveStats() {
-  const users = getData(STORAGE_KEYS.USERS).filter(u => u.role === 'student');
-  const notes = getData(STORAGE_KEYS.NOTES).filter(n => n.type === 'official');
-  const subjects = getSubjects();
+async function getLiveStats() {
+  const users = (await getData(STORAGE_KEYS.USERS)).filter(u => u.role === 'student');
+  const notes = (await getData(STORAGE_KEYS.NOTES)).filter(n => n.type === 'official');
+  const subjects = await getSubjects();
   return {
     students: users.length,
     notes: notes.length,

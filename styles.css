@@ -625,6 +625,11 @@ header nav {
   to { transform: translateX(0); opacity: 1; }
 }
 
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes fadeInDown {
   from { transform: translateY(-30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

@@ -609,23 +609,21 @@
           showToast('📩 [SIMULATION] Code: ' + generatedOTP);
           console.info("🔑 [DEBUG] Verification Code:", generatedOTP);
         } else {
-          // Send via EmailJS - Passing Public Key directly for extra reliability
-          // Calculate expiration time (2 minutes from now)
+          // Send via EmailJS - Optimized for speed
           const expiryTime = new Date(Date.now() + 2 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-          const response = await emailjs.send(
+          
+          await emailjs.send(
             "service_zsnxvbj", 
             "template_m7oxyyq", 
             {
-              email: email,             // Matches {{email}}
-              passcode: generatedOTP,   // Matches {{passcode}}
-              time: expiryTime,         // Matches {{time}}
+              email: email,
+              passcode: generatedOTP,
+              time: expiryTime,
               user_name: email.split('@')[0]
             },
             "RQchQ1At3dPYxwnrQ"
           );
-          console.log('EmailJS Success:', response.status, response.text);
-          showToast('📩 Verification code has been sent to your Gmail inbox!');
+          showToast('📩 Verification code has been sent!');
         }
 
         // Proceed to Step 2
