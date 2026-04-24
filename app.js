@@ -25,70 +25,49 @@ const SUBJECT_ICONS = ['📊', '🔐', '🛠️', '🌐', '🌳', '🤖', '💻'
 // Color palette for subjects
 const SUBJECT_COLORS = ['#6c63ff', '#ff6584', '#00E676', '#00bcd4', '#ffd700', '#ff8c00', '#e040fb', '#ff5252', '#448aff', '#69f0ae', '#ffc107', '#7c4dff', '#18ffff', '#ff6e40', '#b388ff'];
 
-// ===== INDEXED DB WRAPPER =====
-const DB_NAME = 'StudyHubDB';
-const DB_VERSION = 1;
-let db = null;
+// ===== FIREBASE SETUP =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCuI8YE3pjHvKkDsccJ_zddRzjWYg89R44",
+  authDomain: "studyhub-193f5.firebaseapp.com",
+  projectId: "studyhub-193f5",
+  storageBucket: "studyhub-193f5.firebasestorage.app",
+  messagingSenderId: "1098651436817",
+  appId: "1:1098651436817:web:5f132892e9c6b53507aeb0",
+  measurementId: "G-EDDS97YM5G"
+};
 
-async function openDB() {
-  if (db) return db;
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('store')) {
-        db.createObjectStore('store');
-      }
-    };
-    request.onsuccess = (e) => {
-      db = e.target.result;
-      resolve(db);
-    };
-    request.onerror = (e) => reject(e.target.error);
-  });
+// Initialize Firebase only if the script is loaded
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
+const db = typeof firebase !== 'undefined' ? firebase.firestore() : null;
+const storage = typeof firebase !== 'undefined' ? firebase.storage() : null;
 
+// ===== DATABASE WRAPPER =====
 async function getDBData(key) {
-  const database = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction(['store'], 'readonly');
-    const store = transaction.objectStore('store');
-    const request = store.get(key);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = (e) => reject(e.target.error);
-  });
+  if (!db) return null;
+  try {
+    const doc = await db.collection('StudyHubStore').doc(key).get();
+    return doc.exists ? doc.data().value : null;
+  } catch (e) {
+    console.error("Error reading from Firestore:", e);
+    return null;
+  }
 }
 
 async function setDBData(key, value) {
-  const database = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = database.transaction(['store'], 'readwrite');
-    const store = transaction.objectStore('store');
-    const request = store.put(value, key);
-    request.onsuccess = () => resolve();
-    request.onerror = (e) => reject(e.target.error);
-  });
+  if (!db) return;
+  try {
+    await db.collection('StudyHubStore').doc(key).set({ value });
+  } catch (e) {
+    console.error("Error writing to Firestore:", e);
+  }
 }
 
 // ===== CORE LOGIC =====
 
 async function initDB() {
-  // Migrate from localStorage to IndexedDB if needed
-  for (const key of Object.values(STORAGE_KEYS)) {
-    const localData = localStorage.getItem(key);
-    if (localData) {
-      try {
-        const parsed = JSON.parse(localData);
-        await setDBData(key, parsed);
-        // Don't remove CURRENT_USER from localStorage as it's small and used for immediate redirect
-        if (key !== STORAGE_KEYS.CURRENT_USER) {
-          localStorage.removeItem(key);
-        }
-      } catch (e) {
-        console.error('Migration failed for key:', key, e);
-      }
-    }
-  }
+  if (!db) return;
 
   let users = await getDBData(STORAGE_KEYS.USERS);
   if (!users) {

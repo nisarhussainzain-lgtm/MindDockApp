@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyHub - Student Dashboard</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -73,11 +76,11 @@
         <label>Note Title</label>
         <input type="text" id="pNoteTitle" class="input-field" required>
         
-        <label>File (PDF/Image)</label>
-        <input type="file" id="pNoteFile" class="input-field" required accept=".pdf,image/*">
+        <label>Google Drive Link (URL)</label>
+        <input type="url" id="pNoteFileUrl" class="input-field" required placeholder="https://drive.google.com/file/d/...">
         
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button type="submit" class="btn" style="flex:1;">Upload</button>
+          <button type="submit" class="btn" style="flex:1;">Upload Link</button>
           <button type="button" class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('uploadPersonalModal').classList.add('hidden')">Cancel</button>
         </div>
       </form>
@@ -252,19 +255,15 @@
     }
 
     // Upload Personal Note
-    document.getElementById('uploadPersonalForm').addEventListener('submit', function(e) {
+    document.getElementById('uploadPersonalForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const title = document.getElementById('pNoteTitle').value.trim();
-      const fileInput = document.getElementById('pNoteFile');
-      const file = fileInput.files[0];
+      const fileUrl = document.getElementById('pNoteFileUrl').value.trim();
       
-      if (!file) return;
+      if (!fileUrl) return;
 
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        const base64String = event.target.result;
-        
+      try {
         const newNote = {
           id: Date.now().toString(),
           title: title,
@@ -273,25 +272,22 @@
           uploadedBy: user.id,
           uploaderName: user.name,
           date: Date.now(),
-          fileData: base64String,
-          mimeType: file.type,
-          fileName: file.name
+          fileData: fileUrl,
+          mimeType: 'url',
+          fileName: 'Google Drive Link'
         };
 
         const notes = await getData(STORAGE_KEYS.NOTES);
-        try {
-            notes.push(newNote);
-            await saveData(STORAGE_KEYS.NOTES, notes);
-            showToast('Personal Note Uploaded Successfully! ✅');
-            this.reset();
-            document.getElementById('uploadPersonalModal').classList.add('hidden');
-            await renderNotes();
-        } catch(err) {
-            showToast('Storage Error! File might be too large. ❌');
-        }
-      }.bind(this);
-      
-      reader.readAsDataURL(file);
+        notes.push(newNote);
+        await saveData(STORAGE_KEYS.NOTES, notes);
+        showToast('Personal Note Uploaded Successfully! ✅');
+        this.reset();
+        document.getElementById('uploadPersonalModal').classList.add('hidden');
+        await renderNotes();
+      } catch(err) {
+        showToast('Storage Error! Failed to upload file. ❌');
+        console.error(err);
+      }
     });
 
     async function downloadFile(noteId) {
@@ -299,9 +295,17 @@
       const note = notes.find(n => n.id === noteId);
       if (!note) return showToast('File not found');
 
+      let src = note.fileData;
+      
+      // If it's a URL (Google Drive link, etc.)
+      if (src && src.startsWith('http')) {
+         window.open(src, '_blank');
+         return;
+      }
+
       document.getElementById('viewFileTitle').textContent = note.title;
       
-      let src = note.fileData;
+      // If it's still a legacy base64 file (before Firebase migration)
       if (src && src.startsWith('data:')) {
           try {
               let arr = src.split(',');
@@ -318,6 +322,7 @@
               console.error('Failed to create blob for file viewing', e);
           }
       }
+      // If it's a new Firebase Storage URL, it will just load directly into the iframe or prompt download
       
       document.getElementById('viewFileFrame').src = src;
       document.getElementById('viewFileModal').classList.remove('hidden');

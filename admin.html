@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyHub - Admin Panel</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
   <style>
     .edit-modal-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -82,8 +85,8 @@
             <label>Note Title</label>
             <input type="text" id="adminNoteTitle" class="input-field" required placeholder="e.g. Lecture 3 - Probability Basics">
 
-            <label>File (PDF/Image)</label>
-            <input type="file" id="adminNoteFile" class="input-field" required accept=".pdf,image/*">
+            <label>Google Drive Link (URL)</label>
+            <input type="url" id="adminNoteFileUrl" class="input-field" required placeholder="https://drive.google.com/file/d/...">
             
             <button type="submit" class="btn" style="padding:14px 28px;">📤 Upload to Portal</button>
           </form>
@@ -325,20 +328,16 @@
     }
 
     // ===== UPLOAD OFFICIAL NOTE =====
-    document.getElementById('adminUploadForm').addEventListener('submit', function(e) {
+    document.getElementById('adminUploadForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const title = document.getElementById('adminNoteTitle').value.trim();
       const subject = document.getElementById('adminSubject').value;
-      const fileInput = document.getElementById('adminNoteFile');
-      const file = fileInput.files[0];
+      const fileUrl = document.getElementById('adminNoteFileUrl').value.trim();
       
-      if (!file) return;
+      if (!fileUrl) return;
 
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        const base64String = event.target.result;
-        
+      try {
         const newNote = {
           id: Date.now().toString(),
           title,
@@ -347,26 +346,22 @@
           uploadedBy: user.id,
           uploaderName: user.name,
           date: Date.now(),
-          fileData: base64String,
-          mimeType: file.type,
-          fileName: file.name
+          fileData: fileUrl,
+          mimeType: 'url',
+          fileName: 'Google Drive Link'
         };
 
         const notes = await getData(STORAGE_KEYS.NOTES);
-        try {
-          notes.push(newNote);
-          await saveData(STORAGE_KEYS.NOTES, notes);
-          showToast('✅ Official Note Published!');
-          this.reset();
-          await populateSubjectDropdowns();
-          await refreshStats();
-        } catch(err) {
-          showToast('❌ Storage Error! Try a smaller file or clear storage.');
-          console.error(err);
-        }
-      }.bind(this);
-      
-      reader.readAsDataURL(file);
+        notes.push(newNote);
+        await saveData(STORAGE_KEYS.NOTES, notes);
+        showToast('✅ Official Note Published!');
+        this.reset();
+        await populateSubjectDropdowns();
+        await refreshStats();
+      } catch(err) {
+        showToast('❌ Storage Error! Failed to upload file.');
+        console.error(err);
+      }
     });
 
     // ===== MANAGE NOTES =====
