@@ -8,6 +8,7 @@
   <meta name="description"
     content="StudyHub - The ultimate study portal for BS IT students at Sindh Madressatul Islam University, Karachi. Access notes, deadlines, and course materials.">
   <link rel="stylesheet" href="styles.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -111,7 +112,30 @@
         <button type="submit" class="btn" style="width: 100%; padding: 14px;">Login →</button>
       </form>
       <div class="auth-toggle">
+        <span onclick="toggleForgotPassword()" style="color: #6c63ff; cursor: pointer; font-size: 0.85rem; display: block; margin-bottom: 10px;">Forgot Password?</span>
         Don't have an account? <span onclick="toggleAuth()">Sign Up</span>
+      </div>
+    </div>
+
+    <!-- Forgot Password Box -->
+    <div class="glass-card auth-box hidden" id="forgotBox"
+      style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
+      <h2 style="margin-bottom: 10px; text-align: center; font-size: 1.3rem;">Reset Password 🔑</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">Enter your details to reset your password.</p>
+      <form id="forgotForm">
+        <label>Roll Number</label>
+        <input type="text" id="forgotRoll" class="input-field" required placeholder="e.g. BIT25S001">
+
+        <label>Gmail Address</label>
+        <input type="email" id="forgotEmail" class="input-field" required placeholder="yourname@gmail.com">
+
+        <label>New Password</label>
+        <input type="password" id="forgotNewPass" class="input-field" required placeholder="Enter new password">
+
+        <button type="submit" class="btn" style="width: 100%; padding: 14px;">Reset Password →</button>
+      </form>
+      <div class="auth-toggle">
+        Remembered? <span onclick="toggleForgotPassword()">Back to Login</span>
       </div>
     </div>
 
@@ -120,21 +144,43 @@
       style="animation: fadeInUp 1s ease-out; width: 100%; max-width: 420px; margin: 0 auto;">
       <h2 style="margin-bottom: 24px; text-align: center; font-size: 1.3rem;">Create Account ✨</h2>
       <form id="signupForm">
-        <label>📧 Gmail Address</label>
-        <div style="position:relative;">
-          <input type="email" id="signupEmail" class="input-field" required placeholder="yourname@gmail.com"
-            style="padding-left:42px;">
-          <span
-            style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; pointer-events:none;">✉️</span>
+        <div id="signupStep1">
+          <label>📧 Gmail Address</label>
+          <div style="position:relative;">
+            <input type="email" id="signupEmail" class="input-field" required placeholder="yourname@gmail.com"
+              style="padding-left:42px;">
+            <span
+              style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:1.1rem; pointer-events:none;">✉️</span>
+          </div>
+
+          <label>Roll Number</label>
+          <input type="text" id="signupRoll" class="input-field" required placeholder="e.g. BIT25S001">
+
+          <label>Password</label>
+          <input type="password" id="signupPass" class="input-field" required placeholder="Create password">
+
+          <button type="button" class="btn" id="btnSendCode" style="width: 100%; padding: 14px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="sendVerificationCode()">
+            <span id="btnSendCodeText">Send Verification Code →</span>
+            <div id="btnSendCodeSpinner" class="hidden" style="width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          </button>
         </div>
 
-        <label>Roll Number</label>
-        <input type="text" id="signupRoll" class="input-field" required placeholder="e.g. BIT25S001">
+        <div id="signupStep2" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <label>🔑 Enter Verification Code</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <p style="font-size: 0.75rem; color: #00E676;">Check your Gmail for the code.</p>
+            <div id="otpTimer" style="font-size: 0.85rem; font-weight: 700; color: #ff6584;">02:00</div>
+          </div>
+          <input type="text" id="signupVerifyCode" class="input-field" placeholder="Enter 6-digit code">
+          <button type="submit" id="btnCompleteSignup" class="btn" style="width: 100%; padding: 14px;">Complete Sign Up ✓</button>
+          
+          <div id="resendContainer" class="hidden" style="text-align: center; margin-top: 15px;">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Code expired?</p>
+            <button type="button" class="btn btn-secondary" style="width: 100%; padding: 10px;" onclick="sendVerificationCode()">Resend Code 🔄</button>
+          </div>
 
-        <label>Password</label>
-        <input type="password" id="signupPass" class="input-field" required placeholder="Create password">
-
-        <button type="submit" class="btn" style="width: 100%; padding: 14px;">Sign Up →</button>
+          <button type="button" class="btn btn-secondary" style="width: 100%; padding: 10px; margin-top: 10px; font-size: 0.85rem;" onclick="backToStep1()">Edit Info</button>
+        </div>
       </form>
       <div class="auth-toggle">
         Already have an account? <span onclick="toggleAuth()">Login</span>
@@ -367,8 +413,8 @@
       }, 30);
     }
 
-    function loadStats() {
-      const stats = getLiveStats();
+    async function loadStats() {
+      const stats = await getLiveStats();
       animateCount(document.getElementById('statStudents'), stats.students);
       animateCount(document.getElementById('statSubjects'), stats.subjects);
       animateCount(document.getElementById('statNotes'), stats.notes);
@@ -378,8 +424,8 @@
     }
 
     // ===== RENDER DYNAMIC SUBJECTS =====
-    function renderFrontSubjects() {
-      const subjects = getSubjects();
+    async function renderFrontSubjects() {
+      const subjects = await getSubjects();
       const grid = document.getElementById('frontSubjectsGrid');
       grid.innerHTML = subjects.map(subj => `
         <div class="glass-card front-subject-card" style="border-left: 4px solid ${subj.color};" onmouseover="this.style.transform='translateX(6px) scale(1.02)'" onmouseout="this.style.transform='translateX(0) scale(1)'">
@@ -396,10 +442,23 @@
     setTimeout(loadStats, 400);
     renderFrontSubjects();
 
+    // Initialize EmailJS with a small delay to ensure script is loaded
+    window.onload = function() {
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init("RQchQ1At3dPYxwnrQ");
+        console.log("EmailJS Initialized ✅");
+      }
+    };
+
     // Redirect if already logged in
     const user = getCurrentUser();
     if (user) {
       window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+    }
+
+    function toggleForgotPassword() {
+      document.getElementById('loginBox').classList.toggle('hidden');
+      document.getElementById('forgotBox').classList.toggle('hidden');
     }
 
     function toggleAuth() {
@@ -407,11 +466,11 @@
       document.getElementById('signupBox').classList.toggle('hidden');
     }
 
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const roll = document.getElementById('loginRoll').value.trim();
       const pass = document.getElementById('loginPass').value;
-      const users = getData(STORAGE_KEYS.USERS);
+      const users = await getData(STORAGE_KEYS.USERS);
 
       const found = users.find(u => u.rollNumber === roll && u.password === pass);
       if (found) {
@@ -425,16 +484,92 @@
       }
     });
 
-    document.getElementById('signupForm').addEventListener('submit', (e) => {
+    document.getElementById('forgotForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('signupEmail').value.trim().toLowerCase();
-      const roll = document.getElementById('signupRoll').value.trim();
-      const pass = document.getElementById('signupPass').value;
+      const roll = document.getElementById('forgotRoll').value.trim();
+      const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+      const newPass = document.getElementById('forgotNewPass').value;
+
+      const users = await getData(STORAGE_KEYS.USERS);
+      const userIdx = users.findIndex(u => u.rollNumber === roll && u.email === email);
+
+      if (userIdx !== -1) {
+        users[userIdx].password = newPass;
+        await saveData(STORAGE_KEYS.USERS, users);
+        showToast('✅ Password reset successful! Please login.');
+        toggleForgotPassword();
+        document.getElementById('forgotForm').reset();
+      } else {
+        showToast('❌ Invalid Roll Number or Email combination.');
+      }
+    });
+
+    let generatedOTP = null;
+    let otpTimerInterval = null;
+
+    function backToStep1() {
+      document.getElementById('signupStep1').classList.remove('hidden');
+      document.getElementById('signupStep2').classList.add('hidden');
+      generatedOTP = null;
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+    }
+
+    function startOTPTimer() {
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+      let timeLeft = 120; // 2 minutes
+      const timerDisplay = document.getElementById('otpTimer');
+      const resendContainer = document.getElementById('resendContainer');
+      const submitBtn = document.getElementById('btnCompleteSignup');
+
+      resendContainer.classList.add('hidden');
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+
+      otpTimerInterval = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+          clearInterval(otpTimerInterval);
+          generatedOTP = null; // Expire code
+          timerDisplay.textContent = "00:00";
+          showToast('⚠️ Verification code expired. Please resend.');
+          resendContainer.classList.remove('hidden');
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+        }
+        timeLeft--;
+      }, 1000);
+    }
+
+    async function sendVerificationCode() {
+      const emailInput = document.getElementById('signupEmail');
+      const rollInput = document.getElementById('signupRoll');
+      const passInput = document.getElementById('signupPass');
+      const btnText = document.getElementById('btnSendCodeText');
+      const btnSpinner = document.getElementById('btnSendCodeSpinner');
+      const btnSend = document.getElementById('btnSendCode');
+
+      const email = emailInput.value.trim().toLowerCase();
+      const roll = rollInput.value.trim().toUpperCase(); // Normalize roll number
+      const pass = passInput.value;
+
+      if (!email || !roll || !pass) {
+        showToast('❌ Please fill all fields first');
+        return;
+      }
 
       // ===== Gmail / Email Validation =====
-      const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+      // Strict regex for standard email format
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
       if (!emailRegex.test(email)) {
-        showToast('❌ Please enter a valid email address (e.g. abc@gmail.com)');
+        showToast('❌ Please enter a valid email address');
+        return;
+      }
+
+      if (!email.endsWith('@gmail.com')) {
+        showToast('❌ Only @gmail.com addresses are allowed for security');
         return;
       }
 
@@ -443,14 +578,86 @@
         showToast('❌ Roll number must start with BIT25S');
         return;
       }
-      const numPart = roll.substring(6);
-      const num = parseInt(numPart, 10);
-      if (numPart.length !== 3 || isNaN(num) || num < 0 || num > 90) {
-        showToast('❌ Roll number must be between BIT25S000 and BIT25S090');
+
+      const users = await getData(STORAGE_KEYS.USERS);
+      if (users.find(u => u.rollNumber === roll)) {
+        showToast('❌ Account with this roll number already exists!');
+        return;
+      }
+      if (users.find(u => u.email === email)) {
+        showToast('❌ An account with this email already exists!');
         return;
       }
 
-      const users = getData(STORAGE_KEYS.USERS);
+      // Start Loading State
+      btnSend.disabled = true;
+      btnText.textContent = "Sending Code...";
+      btnSpinner.classList.remove('hidden');
+
+      // Generate a random 6-digit code
+      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // ===== EMAILJS CONFIGURATION =====
+      const SERVICE_ID = "service_zsnxvbj";
+      const TEMPLATE_ID = "template_m7oxyyq";
+      const PUBLIC_KEY = "RQchQ1At3dPYxwnrQ";
+
+      try {
+        if (SERVICE_ID === "YOUR_SERVICE_ID") {
+          // Simulation Mode
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Mimic network delay
+          showToast('📩 [SIMULATION] Code: ' + generatedOTP);
+          console.info("🔑 [DEBUG] Verification Code:", generatedOTP);
+        } else {
+          // Send via EmailJS - Passing Public Key directly for extra reliability
+          // Calculate expiration time (2 minutes from now)
+          const expiryTime = new Date(Date.now() + 2 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          const response = await emailjs.send(
+            "service_zsnxvbj", 
+            "template_m7oxyyq", 
+            {
+              email: email,             // Matches {{email}}
+              passcode: generatedOTP,   // Matches {{passcode}}
+              time: expiryTime,         // Matches {{time}}
+              user_name: email.split('@')[0]
+            },
+            "RQchQ1At3dPYxwnrQ"
+          );
+          console.log('EmailJS Success:', response.status, response.text);
+          showToast('📩 Verification code has been sent to your Gmail inbox!');
+        }
+
+        // Proceed to Step 2
+        document.getElementById('signupStep1').classList.add('hidden');
+        document.getElementById('signupStep2').classList.remove('hidden');
+        startOTPTimer();
+      } catch (error) {
+        showToast('❌ Failed to send email. Check internet or EmailJS keys.');
+        console.error('EmailJS Error:', error);
+      } finally {
+        // Reset Button
+        btnSend.disabled = false;
+        btnText.textContent = "Send Verification Code →";
+        btnSpinner.classList.add('hidden');
+      }
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const enteredCode = document.getElementById('signupVerifyCode').value.trim();
+      
+      if (!generatedOTP || enteredCode !== generatedOTP) {
+        showToast('❌ Invalid verification code!');
+        return;
+      }
+
+      const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+      const roll = document.getElementById('signupRoll').value.trim();
+      const pass = document.getElementById('signupPass').value;
+
+      const users = await getData(STORAGE_KEYS.USERS);
 
       if (users.find(u => u.rollNumber === roll)) {
         showToast('❌ Account with this roll number already exists!');
@@ -476,7 +683,7 @@
       };
 
       users.push(newUser);
-      saveData(STORAGE_KEYS.USERS, users);
+      await saveData(STORAGE_KEYS.USERS, users);
       showToast('✅ Account created successfully! Please login.');
       toggleAuth();
       document.getElementById('signupForm').reset();

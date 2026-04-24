@@ -133,8 +133,8 @@
 
     document.getElementById('userNameDisplay').textContent = '👋 Hello, ' + user.name;
 
-    function renderAnnouncements() {
-      const announcements = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+    async function renderAnnouncements() {
+      const announcements = await getData(STORAGE_KEYS.ANNOUNCEMENTS);
       const area = document.getElementById('announcementArea');
       if (announcements.length === 0) {
         area.innerHTML = '';
@@ -150,8 +150,8 @@
       `;
     }
 
-    function renderSubjects() {
-      const subjects = getSubjects();
+    async function renderSubjects() {
+      const subjects = await getSubjects();
       const grid = document.getElementById('subjectsGrid');
       grid.innerHTML = subjects.map(subj => `
         <div class="glass-card subject-card" onclick="openSubject('${subj.name.replace(/'/g, "\\'")}')">
@@ -165,16 +165,16 @@
       `).join('');
     }
 
-    function openSubject(subject) {
+    async function openSubject(subject) {
       currentSubject = subject;
-      const subjData = getSubjectByName(subject);
+      const subjData = await getSubjectByName(subject);
       document.getElementById('subjectsGrid').classList.add('hidden');
       document.getElementById('searchResultsView').classList.add('hidden');
       document.getElementById('subjectDetailView').classList.remove('hidden');
       document.getElementById('currentSubjectIcon').textContent = subjData.icon;
       document.getElementById('currentSubjectName').textContent = subject;
-      renderNotes();
-      renderSubjectReminders(subject);
+      await renderNotes();
+      await renderSubjectReminders(subject);
     }
 
     function backToSubjects() {
@@ -185,9 +185,9 @@
       document.getElementById('searchNotes').value = '';
     }
 
-    function renderNotes() {
+    async function renderNotes() {
       if(!currentSubject) return;
-      const allNotes = getData(STORAGE_KEYS.NOTES);
+      const allNotes = await getData(STORAGE_KEYS.NOTES);
       
       const officialNotes = allNotes.filter(n => n.subject === currentSubject && n.type === 'official');
       const personalNotes = allNotes.filter(n => n.subject === currentSubject && n.type === 'personal' && n.uploadedBy === user.id);
@@ -212,10 +212,10 @@
       perList.innerHTML = personalNotes.length ? personalNotes.map(renderNoteHtml).join('') : '<p style="color:var(--text-muted); font-size: 0.9rem;">You haven\'t uploaded any personal notes for this subject.</p>';
     }
 
-    function handleSearch() {
+    async function handleSearch() {
         const query = document.getElementById('searchNotes').value.toLowerCase();
         if(query.trim() === '') {
-            if(currentSubject) openSubject(currentSubject);
+            if(currentSubject) await openSubject(currentSubject);
             else backToSubjects();
             return;
         }
@@ -224,7 +224,7 @@
         document.getElementById('subjectDetailView').classList.add('hidden');
         document.getElementById('searchResultsView').classList.remove('hidden');
 
-        const allNotes = getData(STORAGE_KEYS.NOTES);
+        const allNotes = await getData(STORAGE_KEYS.NOTES);
         const visibleNotes = allNotes.filter(n => n.type === 'official' || (n.type === 'personal' && n.uploadedBy === user.id));
         
         const results = visibleNotes.filter(n => n.title.toLowerCase().includes(query) || n.subject.toLowerCase().includes(query));
@@ -262,7 +262,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = async function(event) {
         const base64String = event.target.result;
         
         const newNote = {
@@ -278,24 +278,24 @@
           fileName: file.name
         };
 
-        const notes = getData(STORAGE_KEYS.NOTES);
+        const notes = await getData(STORAGE_KEYS.NOTES);
         try {
             notes.push(newNote);
-            saveData(STORAGE_KEYS.NOTES, notes);
+            await saveData(STORAGE_KEYS.NOTES, notes);
             showToast('Personal Note Uploaded Successfully! ✅');
             this.reset();
             document.getElementById('uploadPersonalModal').classList.add('hidden');
-            renderNotes();
+            await renderNotes();
         } catch(err) {
-            showToast('Storage Limit Exceeded! File too large. ❌');
+            showToast('Storage Error! File might be too large. ❌');
         }
       }.bind(this);
       
       reader.readAsDataURL(file);
     });
 
-    function downloadFile(noteId) {
-      const notes = getData(STORAGE_KEYS.NOTES);
+    async function downloadFile(noteId) {
+      const notes = await getData(STORAGE_KEYS.NOTES);
       const note = notes.find(n => n.id === noteId);
       if (!note) return showToast('File not found');
 
@@ -337,23 +337,23 @@
       }
     });
 
-    function deletePersonalNote(noteId) {
+    async function deletePersonalNote(noteId) {
       if(!confirm('Are you sure you want to delete your personal note?')) return;
-      let notes = getData(STORAGE_KEYS.NOTES);
+      let notes = await getData(STORAGE_KEYS.NOTES);
       notes = notes.filter(n => n.id !== noteId);
-      saveData(STORAGE_KEYS.NOTES, notes);
+      await saveData(STORAGE_KEYS.NOTES, notes);
       showToast('Personal Note Deleted 🗑️');
       
       if (!document.getElementById('searchResultsView').classList.contains('hidden')) {
-          handleSearch();
+          await handleSearch();
       } else {
-          renderNotes();
+          await renderNotes();
       }
     }
 
-    function renderSubjectReminders(subject) {
+    async function renderSubjectReminders(subject) {
       const area = document.getElementById('subjectRemindersArea');
-      const allReminders = getData(STORAGE_KEYS.REMINDERS);
+      const allReminders = await getData(STORAGE_KEYS.REMINDERS);
       const reminders = allReminders.filter(r => r.subject === subject);
 
       if (reminders.length === 0) {

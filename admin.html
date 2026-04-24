@@ -244,8 +244,8 @@
     document.getElementById('userNameDisplay').textContent = 'Admin: ' + user.name;
 
     // Update live stats bar
-    function refreshStats() {
-      const stats = getLiveStats();
+    async function refreshStats() {
+      const stats = await getLiveStats();
       document.getElementById('adminStatStudents').textContent = stats.students;
       document.getElementById('adminStatSubjects').textContent = stats.subjects;
       document.getElementById('adminStatNotes').textContent = stats.notes;
@@ -253,8 +253,8 @@
     refreshStats();
 
     // ===== POPULATE SUBJECT DROPDOWNS =====
-    function populateSubjectDropdowns() {
-      const subjects = getSubjects();
+    async function populateSubjectDropdowns() {
+      const subjects = await getSubjects();
       const selects = ['adminSubject', 'reminderSubject'];
       selects.forEach(id => {
         const sel = document.getElementById(id);
@@ -311,17 +311,17 @@
     buildColorPicker('colorPickerAdd', 'newSubjColor', '#6c63ff');
 
     // ===== SWITCH VIEW =====
-    function switchView(viewId, btn) {
+    async function switchView(viewId, btn) {
       document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
       document.getElementById(viewId).classList.remove('hidden');
       document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      if(viewId === 'manageNotesView') renderAdminNotes();
-      if(viewId === 'studentsView') renderStudents();
-      if(viewId === 'announcementView') renderAnnouncementsList();
-      if(viewId === 'remindersView') renderRemindersList();
-      if(viewId === 'subjectsView') renderAdminSubjectsList();
+      if(viewId === 'manageNotesView') await renderAdminNotes();
+      if(viewId === 'studentsView') await renderStudents();
+      if(viewId === 'announcementView') await renderAnnouncementsList();
+      if(viewId === 'remindersView') await renderRemindersList();
+      if(viewId === 'subjectsView') await renderAdminSubjectsList();
     }
 
     // ===== UPLOAD OFFICIAL NOTE =====
@@ -336,7 +336,7 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = async function(event) {
         const base64String = event.target.result;
         
         const newNote = {
@@ -352,16 +352,17 @@
           fileName: file.name
         };
 
-        const notes = getData(STORAGE_KEYS.NOTES);
+        const notes = await getData(STORAGE_KEYS.NOTES);
         try {
           notes.push(newNote);
-          saveData(STORAGE_KEYS.NOTES, notes);
+          await saveData(STORAGE_KEYS.NOTES, notes);
           showToast('✅ Official Note Published!');
           this.reset();
-          populateSubjectDropdowns();
-          refreshStats();
+          await populateSubjectDropdowns();
+          await refreshStats();
         } catch(err) {
-          showToast('❌ Storage Limit Exceeded! LocalStorage full.');
+          showToast('❌ Storage Error! Try a smaller file or clear storage.');
+          console.error(err);
         }
       }.bind(this);
       
@@ -369,8 +370,8 @@
     });
 
     // ===== MANAGE NOTES =====
-    function renderAdminNotes() {
-      const notes = getData(STORAGE_KEYS.NOTES).filter(n => n.type === 'official');
+    async function renderAdminNotes() {
+      const notes = (await getData(STORAGE_KEYS.NOTES)).filter(n => n.type === 'official');
       const container = document.getElementById('adminNotesList');
       
       if(notes.length === 0) {
@@ -389,19 +390,19 @@
       `).join('');
     }
 
-    function deleteNote(id) {
+    async function deleteNote(id) {
       if(!confirm('Are you sure you want to delete this Official Note?')) return;
-      let notes = getData(STORAGE_KEYS.NOTES);
+      let notes = await getData(STORAGE_KEYS.NOTES);
       notes = notes.filter(n => n.id !== id);
-      saveData(STORAGE_KEYS.NOTES, notes);
+      await saveData(STORAGE_KEYS.NOTES, notes);
       showToast('Note deleted 🗑️');
-      renderAdminNotes();
-      refreshStats();
+      await renderAdminNotes();
+      await refreshStats();
     }
 
     // ===== MANAGE SUBJECTS =====
-    function renderAdminSubjectsList() {
-      const subjects = getSubjects();
+    async function renderAdminSubjectsList() {
+      const subjects = await getSubjects();
       const container = document.getElementById('adminSubjectsList');
 
       if(subjects.length === 0) {
@@ -427,14 +428,14 @@
     }
 
     // Add Subject
-    document.getElementById('addSubjectForm').addEventListener('submit', function(e) {
+    document.getElementById('addSubjectForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const name = document.getElementById('newSubjName').value.trim();
       const desc = document.getElementById('newSubjDesc').value.trim();
       const icon = document.getElementById('newSubjIcon').value || '📚';
       const color = document.getElementById('newSubjColor').value || '#6c63ff';
 
-      const subjects = getSubjects();
+      const subjects = await getSubjects();
       if(subjects.find(s => s.name.toLowerCase() === name.toLowerCase())) {
         showToast('❌ A subject with this name already exists!');
         return;
@@ -448,19 +449,19 @@
       const bgColor = `rgba(${r},${g},${b},0.15)`;
 
       subjects.push({ name, icon, color, bgColor, description: desc });
-      saveSubjects(subjects);
+      await saveSubjects(subjects);
       showToast('✅ Subject added!');
       this.reset();
       buildIconPicker('iconPickerAdd', 'newSubjIcon', '📚');
       buildColorPicker('colorPickerAdd', 'newSubjColor', '#6c63ff');
-      renderAdminSubjectsList();
-      populateSubjectDropdowns();
-      refreshStats();
+      await renderAdminSubjectsList();
+      await populateSubjectDropdowns();
+      await refreshStats();
     });
 
     // Open Edit Modal
-    function openEditSubject(idx) {
-      const subjects = getSubjects();
+    async function openEditSubject(idx) {
+      const subjects = await getSubjects();
       const s = subjects[idx];
       document.getElementById('editSubjIndex').value = idx;
       document.getElementById('editSubjName').value = s.name;
@@ -474,7 +475,7 @@
       document.getElementById('editSubjectModal').classList.add('hidden');
     }
 
-    document.getElementById('editSubjectForm').addEventListener('submit', function(e) {
+    document.getElementById('editSubjectForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const idx = parseInt(document.getElementById('editSubjIndex').value);
       const name = document.getElementById('editSubjName').value.trim();
@@ -482,7 +483,7 @@
       const icon = document.getElementById('editSubjIcon').value || '📚';
       const color = document.getElementById('editSubjColor').value || '#6c63ff';
 
-      const subjects = getSubjects();
+      const subjects = await getSubjects();
       const oldName = subjects[idx].name;
 
       // Convert hex to rgba
@@ -493,52 +494,52 @@
       const bgColor = `rgba(${r},${g},${b},0.15)`;
 
       subjects[idx] = { name, icon, color, bgColor, description: desc };
-      saveSubjects(subjects);
+      await saveSubjects(subjects);
 
       // Rename references in notes & reminders if name changed
       if(oldName !== name) {
-        let notes = getData(STORAGE_KEYS.NOTES);
+        let notes = await getData(STORAGE_KEYS.NOTES);
         notes.forEach(n => { if(n.subject === oldName) n.subject = name; });
-        saveData(STORAGE_KEYS.NOTES, notes);
+        await saveData(STORAGE_KEYS.NOTES, notes);
 
-        let reminders = getData(STORAGE_KEYS.REMINDERS);
+        let reminders = await getData(STORAGE_KEYS.REMINDERS);
         reminders.forEach(r => { if(r.subject === oldName) r.subject = name; });
-        saveData(STORAGE_KEYS.REMINDERS, reminders);
+        await saveData(STORAGE_KEYS.REMINDERS, reminders);
       }
 
       showToast('✅ Subject updated!');
       closeEditModal();
-      renderAdminSubjectsList();
-      populateSubjectDropdowns();
-      refreshStats();
+      await renderAdminSubjectsList();
+      await populateSubjectDropdowns();
+      await refreshStats();
     });
 
-    function deleteSubject(idx) {
-      const subjects = getSubjects();
+    async function deleteSubject(idx) {
+      const subjects = await getSubjects();
       const s = subjects[idx];
       if(!confirm(`Delete "${s.name}"? Notes for this subject will also be removed.`)) return;
 
       // Remove associated notes
-      let notes = getData(STORAGE_KEYS.NOTES);
+      let notes = await getData(STORAGE_KEYS.NOTES);
       notes = notes.filter(n => n.subject !== s.name);
-      saveData(STORAGE_KEYS.NOTES, notes);
+      await saveData(STORAGE_KEYS.NOTES, notes);
 
       // Remove associated reminders
-      let reminders = getData(STORAGE_KEYS.REMINDERS);
+      let reminders = await getData(STORAGE_KEYS.REMINDERS);
       reminders = reminders.filter(r => r.subject !== s.name);
-      saveData(STORAGE_KEYS.REMINDERS, reminders);
+      await saveData(STORAGE_KEYS.REMINDERS, reminders);
 
       subjects.splice(idx, 1);
-      saveSubjects(subjects);
+      await saveSubjects(subjects);
       showToast('Subject deleted 🗑️');
-      renderAdminSubjectsList();
-      populateSubjectDropdowns();
-      refreshStats();
+      await renderAdminSubjectsList();
+      await populateSubjectDropdowns();
+      await refreshStats();
     }
 
     // ===== STUDENTS =====
-    function renderStudents() {
-      const users = getData(STORAGE_KEYS.USERS).filter(u => u.role === 'student');
+    async function renderStudents() {
+      const users = (await getData(STORAGE_KEYS.USERS)).filter(u => u.role === 'student');
       const container = document.getElementById('adminStudentsList');
       
       if(users.length === 0) {
@@ -563,37 +564,37 @@
       `).join('');
     }
 
-    function deleteStudent(id) {
+    async function deleteStudent(id) {
       if(!confirm('Delete this student account and their personal notes?')) return;
-      let users = getData(STORAGE_KEYS.USERS);
+      let users = await getData(STORAGE_KEYS.USERS);
       users = users.filter(u => u.id !== id);
-      saveData(STORAGE_KEYS.USERS, users);
+      await saveData(STORAGE_KEYS.USERS, users);
       
-      let notes = getData(STORAGE_KEYS.NOTES);
+      let notes = await getData(STORAGE_KEYS.NOTES);
       notes = notes.filter(n => n.uploadedBy !== id);
-      saveData(STORAGE_KEYS.NOTES, notes);
+      await saveData(STORAGE_KEYS.NOTES, notes);
 
       showToast('Student Removed 🗑️');
-      renderStudents();
-      refreshStats();
+      await renderStudents();
+      await refreshStats();
     }
 
     // ===== ANNOUNCEMENTS =====
-    document.getElementById('announcementForm').addEventListener('submit', function(e) {
+    document.getElementById('announcementForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const text = document.getElementById('announcementText').value.trim();
       if(!text) return;
 
-      const anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+      const anns = await getData(STORAGE_KEYS.ANNOUNCEMENTS);
       anns.push({ id: Date.now().toString(), text, date: Date.now() });
-      saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
+      await saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
       showToast('📢 Announcement Posted!');
       this.reset();
-      renderAnnouncementsList();
+      await renderAnnouncementsList();
     });
 
-    function renderAnnouncementsList() {
-      const anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+    async function renderAnnouncementsList() {
+      const anns = await getData(STORAGE_KEYS.ANNOUNCEMENTS);
       const container = document.getElementById('adminAnnouncementsList');
       if(anns.length === 0) {
         container.innerHTML = '<p style="color:var(--text-muted);">No announcements yet.</p>';
@@ -611,17 +612,17 @@
       `).join('');
     }
 
-    function deleteAnnouncement(id) {
+    async function deleteAnnouncement(id) {
       if(!confirm('Delete this announcement?')) return;
-      let anns = getData(STORAGE_KEYS.ANNOUNCEMENTS);
+      let anns = await getData(STORAGE_KEYS.ANNOUNCEMENTS);
       anns = anns.filter(a => a.id !== id);
-      saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
+      await saveData(STORAGE_KEYS.ANNOUNCEMENTS, anns);
       showToast('Announcement deleted 🗑️');
-      renderAnnouncementsList();
+      await renderAnnouncementsList();
     }
 
     // ===== REMINDERS =====
-    document.getElementById('reminderForm').addEventListener('submit', function(e) {
+    document.getElementById('reminderForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       const subject = document.getElementById('reminderSubject').value;
       const type = document.getElementById('reminderType').value;
@@ -629,22 +630,22 @@
       const deadline = document.getElementById('reminderDeadline').value;
       if(!subject || !topic || !deadline) return;
 
-      const reminders = getData(STORAGE_KEYS.REMINDERS);
+      const reminders = await getData(STORAGE_KEYS.REMINDERS);
       reminders.push({
         id: Date.now().toString(),
         subject, type, topic,
         deadline: new Date(deadline).getTime(),
         dateCreated: Date.now()
       });
-      saveData(STORAGE_KEYS.REMINDERS, reminders);
+      await saveData(STORAGE_KEYS.REMINDERS, reminders);
       showToast('⏱️ Reminder Added!');
       this.reset();
-      populateSubjectDropdowns();
-      renderRemindersList();
+      await populateSubjectDropdowns();
+      await renderRemindersList();
     });
 
-    function renderRemindersList() {
-      const reminders = getData(STORAGE_KEYS.REMINDERS);
+    async function renderRemindersList() {
+      const reminders = await getData(STORAGE_KEYS.REMINDERS);
       const container = document.getElementById('adminRemindersList');
       if(reminders.length === 0) {
         container.innerHTML = '<p style="color:var(--text-muted);">No reminders yet.</p>';
@@ -667,13 +668,13 @@
       `).join('');
     }
 
-    function deleteReminder(id) {
+    async function deleteReminder(id) {
       if(!confirm('Delete this reminder?')) return;
-      let reminders = getData(STORAGE_KEYS.REMINDERS);
+      let reminders = await getData(STORAGE_KEYS.REMINDERS);
       reminders = reminders.filter(r => r.id !== id);
-      saveData(STORAGE_KEYS.REMINDERS, reminders);
+      await saveData(STORAGE_KEYS.REMINDERS, reminders);
       showToast('Reminder deleted 🗑️');
-      renderRemindersList();
+      await renderRemindersList();
     }
 
     // Click outside to close edit modal
